@@ -4,7 +4,7 @@ let quotes = [
   { text: "Life is what happens when you're busy making other plans.", category: "Life" }
 ];
 
-// References to DOM elements
+// DOM references
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuoteBtn");
 const addQuoteBtn = document.getElementById("addQuoteBtn");
@@ -12,14 +12,14 @@ const newQuoteText = document.getElementById("newQuoteText");
 const newQuoteCategory = document.getElementById("newQuoteCategory");
 
 // Function to display a random quote
-function displayRandomQuote() {
+function showRandomQuote() {
   if (quotes.length === 0) {
-    quoteDisplay.textContent = "No quotes available.";
+    quoteDisplay.innerHTML = "No quotes available.";
     return;
   }
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const quote = quotes[randomIndex];
-  quoteDisplay.textContent = `"${quote.text}" — ${quote.category}`;
+  quoteDisplay.innerHTML = `"${quote.text}" — <strong>${quote.category}</strong>`;
 }
 
 // Function to add a new quote
@@ -39,10 +39,10 @@ function addQuote() {
   newQuoteText.value = "";
   newQuoteCategory.value = "";
 
-  // Show newly added quote immediately
-  displayRandomQuote();
+  // Show the newly added quote
+  showRandomQuote();
 }
 
 // Event listeners
-newQuoteBtn.addEventListener("click", displayRandomQuote);
+newQuoteBtn.addEventListener("click", showRandomQuote);
 addQuoteBtn.addEventListener("click", addQuote);
