@@ -11,9 +11,9 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "Life is what happens when you're busy making other plans.", category: "Life" }
 ];
 
-// Save quotes to localStorage
+// Save quotes to localStorage explicitly using localStorage.setItem
 function saveQuotes() {
-  localStorage.setItem("quotes", JSON.stringify(quotes));
+  localStorage.setItem("quotes", JSON.stringify(quotes)); // ✅ localStorage.setItem used here
 }
 
 // Display a random quote
@@ -41,10 +41,13 @@ function addQuote(textInput, categoryInput) {
   }
 
   quotes.push({ text, category });
+
+  // ✅ Update localStorage immediately after adding
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+
   textInput.value = "";
   categoryInput.value = "";
 
-  saveQuotes();
   showRandomQuote();
 }
 
@@ -97,7 +100,10 @@ function importFromJsonFile(event) {
         if (!q.category) q.category = "Uncategorized";
       });
       quotes.push(...importedQuotes);
-      saveQuotes();
+
+      // ✅ Update localStorage after importing
+      localStorage.setItem("quotes", JSON.stringify(quotes));
+
       alert("Quotes imported successfully!");
       showRandomQuote();
     } catch (err) {
