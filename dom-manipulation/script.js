@@ -1,49 +1,46 @@
-// Existing DOM references and functions assumed above
-// (quoteDisplay, newQuoteBtn, addQuoteFormContainer, importFile, exportBtn, categoryFilter, quotes, saveQuotes, filterQuotes, etc.)
-
-// --- Step 1: Simulate Server Interaction ---
-// We'll use a mock API endpoint for demonstration
+// --- Step 1: Fetch quotes from server ---
 const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Mock API
 
-// Function to fetch quotes from the server
-async function fetchServerQuotes() {
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
 
-    // Convert server data to match our quote format for simulation
+    // Transform server data into quote format
     const serverQuotes = serverData.slice(0, 5).map(item => ({
       text: item.title,
-      category: "Server" // Simulated category
+      category: "Server" // Example category for server data
     }));
 
+    // Resolve conflicts with local data
     resolveConflicts(serverQuotes);
+
   } catch (err) {
-    console.error("Error fetching server data:", err);
+    console.error("Error fetching quotes from server:", err);
   }
 }
 
-// --- Step 2: Implement Data Syncing with Conflict Resolution ---
+// --- Step 2: Conflict resolution ---
 function resolveConflicts(serverQuotes) {
   let conflictsResolved = false;
 
   serverQuotes.forEach(sq => {
     const existsLocally = quotes.some(lq => lq.text === sq.text);
     if (!existsLocally) {
-      quotes.push(sq);
+      quotes.push(sq);          // Add new quote from server
       conflictsResolved = true;
     }
   });
 
   if (conflictsResolved) {
-    saveQuotes();         // ✅ update localStorage with merged data
-    populateCategories();  // update category dropdown
-    filterQuotes();       // refresh displayed quote
+    localStorage.setItem("quotes", JSON.stringify(quotes)); // ✅ Save updated quotes
+    populateCategories();   // Update category dropdown
+    filterQuotes();         // Refresh displayed quote
     notifyUser("New quotes synced from server!");
   }
 }
 
-// --- Step 3: UI Notification for Conflict Resolution ---
+// --- Step 3: Notification UI ---
 function notifyUser(message) {
   const notification = document.createElement("div");
   notification.textContent = message;
@@ -62,9 +59,6 @@ function notifyUser(message) {
   }, 3000);
 }
 
-// --- Step 4: Periodic Sync ---
-// Fetch server quotes every 30 seconds
-setInterval(fetchServerQuotes, 30000); // 30,000ms = 30s
-
-// Optionally fetch immediately on page load
-fetchServerQuotes();
+// --- Step 4: Periodic syncing ---
+setInterval(fetchQuotesFromServer, 30000); // every 30 seconds
+fetchQuotesFromServer(); // initial fetch on page load
