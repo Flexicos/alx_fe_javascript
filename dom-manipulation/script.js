@@ -1,64 +1,52 @@
-// --- Step 1: Fetch quotes from server ---
-const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Mock API
-
-async function fetchQuotesFromServer() {
+// Function to send a new quote to the server
+async function postQuoteToServer(quote) {
   try {
-    const response = await fetch(SERVER_URL);
-    const serverData = await response.json();
+    const response = await fetch(SERVER_URL, {
+      method: "POST",              // ✅ HTTP method
+      headers: {
+        "Content-Type": "application/json"  // ✅ Content-Type header
+      },
+      body: JSON.stringify(quote)   // convert quote object to JSON
+    });
 
-    // Transform server data into quote format
-    const serverQuotes = serverData.slice(0, 5).map(item => ({
-      text: item.title,
-      category: "Server" // Example category for server data
-    }));
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`);
+    }
 
-    // Resolve conflicts with local data
-    resolveConflicts(serverQuotes);
+    const result = await response.json();
+    console.log("Quote successfully posted to server:", result);
+    notifyUser("Quote successfully sent to server!");
 
   } catch (err) {
-    console.error("Error fetching quotes from server:", err);
+    console.error("Error posting quote to server:", err);
+    notifyUser("Failed to send quote to server.");
   }
 }
 
-// --- Step 2: Conflict resolution ---
-function resolveConflicts(serverQuotes) {
-  let conflictsResolved = false;
+// --- Extend addQuote function to POST new quotes ---
+function addQuote(textInput, categoryInput) {
+  const text = textInput.value.trim();
+  const category = categoryInput.value.trim() || "Uncategorized";
 
-  serverQuotes.forEach(sq => {
-    const existsLocally = quotes.some(lq => lq.text === sq.text);
-    if (!existsLocally) {
-      quotes.push(sq);          // Add new quote from server
-      conflictsResolved = true;
-    }
-  });
-
-  if (conflictsResolved) {
-    localStorage.setItem("quotes", JSON.stringify(quotes)); // ✅ Save updated quotes
-    populateCategories();   // Update category dropdown
-    filterQuotes();         // Refresh displayed quote
-    notifyUser("New quotes synced from server!");
+  if (!text) {
+    alert("Quote cannot be empty!");
+    return;
   }
+
+  const newQuote = { text, category };
+  quotes.push(newQuote);
+
+  // ✅ Save locally
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+
+  // ✅ Update categories and display
+  populateCategories();
+  filterQuotes();
+
+  // ✅ POST to server
+  postQuoteToServer(newQuote);
+
+  // Clear input fields
+  textInput.value = "";
+  categoryInput.value = "";
 }
-
-// --- Step 3: Notification UI ---
-function notifyUser(message) {
-  const notification = document.createElement("div");
-  notification.textContent = message;
-  notification.style.position = "fixed";
-  notification.style.top = "10px";
-  notification.style.right = "10px";
-  notification.style.background = "#10b981";
-  notification.style.color = "white";
-  notification.style.padding = "10px 15px";
-  notification.style.borderRadius = "6px";
-  notification.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-  document.body.appendChild(notification);
-
-  setTimeout(() => {
-    document.body.removeChild(notification);
-  }, 3000);
-}
-
-// --- Step 4: Periodic syncing ---
-setInterval(fetchQuotesFromServer, 30000); // every 30 seconds
-fetchQuotesFromServer(); // initial fetch on page load
