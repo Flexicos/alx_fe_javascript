@@ -7,26 +7,38 @@ let quotes = [
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 
-function displayQuote() {
-  const index = Date.now() % quotes.length;
-  const quote = quotes[index];
+// REQUIRED FUNCTION
+function showRandomQuote() {
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[randomIndex];
 
-  // Clear previous content
-  while (quoteDisplay.firstChild) {
-    quoteDisplay.removeChild(quoteDisplay.firstChild);
-  }
-
-  const p = document.createElement("p");
-  p.textContent = quote.text;
-
-  const small = document.createElement("small");
-  small.textContent = "Category: " + quote.category;
-
-  quoteDisplay.appendChild(p);
-  quoteDisplay.appendChild(small);
+  quoteDisplay.innerHTML = `
+    <p><strong>${quote.text}</strong></p>
+    <small>Category: ${quote.category}</small>
+  `;
 }
 
-newQuoteBtn.addEventListener("click", displayQuote);
+function addQuote() {
+  const textInput = document.getElementById("newQuoteText");
+  const categoryInput = document.getElementById("newQuoteCategory");
 
-// Show first quote on load
-displayQuote();
+  const newText = textInput.value.trim();
+  const newCategory = categoryInput.value.trim();
+
+  if (!newText || !newCategory) {
+    alert("Please enter both quote and category.");
+    return;
+  }
+
+  quotes.push({ text: newText, category: newCategory });
+
+  textInput.value = "";
+  categoryInput.value = "";
+
+  alert("Quote added!");
+}
+
+newQuoteBtn.addEventListener("click", showRandomQuote);
+
+// Show one on load
+showRandomQuote();
