@@ -123,11 +123,12 @@ async function fetchQuotesFromServer() {
 }
 
 async function syncWithServer() {
+  // 1️⃣ Fetch server quotes
   const serverQuotes = await fetchQuotesFromServer();
 
   let updated = false;
 
-  // Merge server quotes into local quotes (server wins)
+  // 2️⃣ Merge server quotes into local quotes (server wins)
   serverQuotes.forEach(serverQuote => {
     const exists = quotes.some(q => q.text === serverQuote.text);
     if (!exists) {
@@ -136,6 +137,23 @@ async function syncWithServer() {
     }
   });
 
+  // 3️⃣ Push local quotes to server (simulation)
+  try {
+    for (const quote of quotes) {
+      // You can add a unique flag to avoid duplicate POST if needed
+      await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",                      // <-- method
+        headers: {                           // <-- headers
+          "Content-Type": "application/json" // <-- content type
+        },
+        body: JSON.stringify(quote)          // send the quote as JSON
+      });
+    }
+  } catch (err) {
+    console.error("Error posting quotes to server:", err);
+  }
+
+  // 4️⃣ Update local storage if there were new server quotes
   if (updated) {
     saveQuotes();
     populateCategories();
