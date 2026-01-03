@@ -103,6 +103,65 @@ function filterQuotes() {
     <small>Category: ${quote.category}</small>
   `;
 }
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const serverData = await response.json();
+
+    // Convert server data to quotes format
+    const serverQuotes = serverData.slice(0, 10).map(post => ({
+      text: post.title,
+      category: "server" // you can tag server quotes
+    }));
+
+    return serverQuotes;
+  } catch (err) {
+    console.error("Error fetching server quotes:", err);
+    return [];
+  }
+}
+async function syncWithServer() {
+  const serverQuotes = await fetchServerQuotes();
+
+  let updated = false;
+
+  // Check for new quotes from server
+  serverQuotes.forEach(serverQuote => {
+    const exists = quotes.some(q => q.text === serverQuote.text);
+    if (!exists) {
+      quotes.push(serverQuote);
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    saveQuotes();
+    populateCategories();
+    showRandomQuote();
+    notifyUser("Quotes have been updated from the server!");
+  }
+}
+function notifyUser(message) {
+  let notification = document.getElementById("notification");
+  if (!notification) {
+    notification = document.createElement("div");
+    notification.id = "notification";
+    notification.style.position = "fixed";
+    notification.style.top = "10px";
+    notification.style.right = "10px";
+    notification.style.backgroundColor = "#ffd700";
+    notification.style.padding = "10px";
+    notification.style.border = "1px solid #ccc";
+    document.body.appendChild(notification);
+  }
+  notification.textContent = message;
+
+  setTimeout(() => {
+    notification.textContent = "";
+  }, 5000);
+}
+// Sync every 30 seconds
+setInterval(syncWithServer, 30000);
 
 // NEW FUNCTION — creates the form dynamically
 function createAddQuoteForm() {
@@ -136,4 +195,5 @@ loadQuotes();
 populateCategories();   // fill dropdown first
 showRandomQuote();
 createAddQuoteForm();
+syncWithServer();
 
