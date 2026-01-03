@@ -161,6 +161,44 @@ async function syncWithServer() {
     notifyUser("Quotes have been updated from the server!");
   }
 }
+async function syncQuotes() {
+  // 1️⃣ Fetch quotes from server
+  const serverQuotes = await fetchQuotesFromServer();
+
+  let updated = false;
+
+  // 2️⃣ Merge server quotes into local quotes (server wins)
+  serverQuotes.forEach(serverQuote => {
+    const exists = quotes.some(q => q.text === serverQuote.text);
+    if (!exists) {
+      quotes.push(serverQuote);
+      updated = true;
+    }
+  });
+
+  // 3️⃣ Push local quotes to server
+  try {
+    for (const quote of quotes) {
+      await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",                       // send as POST
+        headers: {                            // include headers
+          "Content-Type": "application/json" // JSON content type
+        },
+        body: JSON.stringify(quote)           // send quote as JSON
+      });
+    }
+  } catch (err) {
+    console.error("Error posting quotes to server:", err);
+  }
+
+  // 4️⃣ Update local storage and UI if new quotes arrived
+  if (updated) {
+    saveQuotes();
+    populateCategories();
+    showRandomQuote();
+    notifyUser("Quotes have been updated from the server!");
+  }
+}
 
 function notifyUser(message) {
   let notification = document.getElementById("notification");
