@@ -31,11 +31,33 @@ function addQuote() {
   }
 
   quotes.push({ text: newText, category: newCategory });
-
   textInput.value = "";
   categoryInput.value = "";
 
   alert("Quote added!");
+}
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
+
+function loadQuotes() {
+  const storedQuotes = localStorage.getItem("quotes");
+  if (storedQuotes) {
+    quotes = JSON.parse(storedQuotes);
+  }
+}
+
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+
+  fileReader.onload = function (event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert("Quotes imported successfully!");
+  };
+
+  fileReader.readAsText(event.target.files[0]);
 }
 
 // NEW FUNCTION — creates the form dynamically
