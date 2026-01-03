@@ -180,11 +180,11 @@ async function syncQuotes() {
   try {
     for (const quote of quotes) {
       await fetch("https://jsonplaceholder.typicode.com/posts", {
-        method: "POST",                       // send as POST
-        headers: {                            // include headers
-          "Content-Type": "application/json" // JSON content type
+        method: "POST",                       
+        headers: {                            
+          "Content-Type": "application/json" 
         },
-        body: JSON.stringify(quote)           // send quote as JSON
+        body: JSON.stringify(quote)           
       });
     }
   } catch (err) {
@@ -196,8 +196,10 @@ async function syncQuotes() {
     saveQuotes();
     populateCategories();
     showRandomQuote();
-    notifyUser("Quotes have been updated from the server!");
   }
+
+  // 5️⃣ Notify user that sync is complete
+  notifyUser("Quotes synced with server!");
 }
 
 function notifyUser(message) {
