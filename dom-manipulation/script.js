@@ -103,29 +103,31 @@ function filterQuotes() {
     <small>Category: ${quote.category}</small>
   `;
 }
-async function fetchServerQuotes() {
+// Fetch quotes from the simulated server
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
-    const serverData = await response.json();
+    const data = await response.json();
 
-    // Convert server data to quotes format
-    const serverQuotes = serverData.slice(0, 10).map(post => ({
+    // Map server data to quote objects
+    const serverQuotes = data.slice(0, 10).map(post => ({
       text: post.title,
-      category: "server" // you can tag server quotes
+      category: "server" // tag server quotes
     }));
 
     return serverQuotes;
-  } catch (err) {
-    console.error("Error fetching server quotes:", err);
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
     return [];
   }
 }
+
 async function syncWithServer() {
-  const serverQuotes = await fetchServerQuotes();
+  const serverQuotes = await fetchQuotesFromServer();
 
   let updated = false;
 
-  // Check for new quotes from server
+  // Merge server quotes into local quotes (server wins)
   serverQuotes.forEach(serverQuote => {
     const exists = quotes.some(q => q.text === serverQuote.text);
     if (!exists) {
@@ -141,6 +143,7 @@ async function syncWithServer() {
     notifyUser("Quotes have been updated from the server!");
   }
 }
+
 function notifyUser(message) {
   let notification = document.getElementById("notification");
   if (!notification) {
